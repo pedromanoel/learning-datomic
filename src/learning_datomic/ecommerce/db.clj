@@ -35,6 +35,12 @@
               :db/cardinality :db.cardinality/one
               :db/doc         "The path of the product"}])
 
+(def new-schema (conj schema
+                      {:db/ident       :product/tag
+                       :db/valueType   :db.type/string
+                       :db/cardinality :db.cardinality/many
+                       :db/doc         "Tags for the product"}))
+
 (defn create-schema
   [conn]
   (d/transact conn schema))
@@ -94,3 +100,19 @@
   [db]
   (d/q '[:find (pull ?e [*])
          :where [?e :product/name ?name]] db))
+
+(defn all-products-with-prices-greater-than [db minimum-price]
+  (d/q '[:find (pull ?e [*])
+         :in $ ?minimum-price
+         :where [?e :product/price ?price]
+                [(> ?price ?minimum-price)]] db minimum-price))
+
+(defn find-product [db id]
+  (d/entity db id))
+
+(defn first-product-with-path [db path]
+  (first (first (d/q '[:find (pull ?e [*])
+                       :in $ ?path
+                       :where [?e :product/path ?path]]
+                     db path)))
+  )
