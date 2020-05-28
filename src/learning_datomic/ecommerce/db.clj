@@ -69,6 +69,28 @@
 
 (defn product-names-and-prices [db]
   (d/q '[:find ?name ?price
+         :keys product/name product/price
          :where [?e :product/name ?name]
                 [?e :product/price ?price]]
        db))
+
+(defn all-products-with-all-attrs
+  "Only work when entity have all attributes set"
+  [db]
+  (d/q '[:find ?e ?name ?path ?price
+         :keys product/id product/name product/path product/price
+         :where [?e :product/name ?name]
+                [?e :product/path ?path]
+                [?e :product/price ?price]] db))
+
+(defn all-products
+  "Works with sparse entities"
+  [db]
+  (d/q '[:find (pull ?e [:product/name :product/path :product/price])
+         :where [?e :product/name ?name]] db))
+
+(defn all-products-*
+  "Works with sparse entities"
+  [db]
+  (d/q '[:find (pull ?e [*])
+         :where [?e :product/name ?name]] db))

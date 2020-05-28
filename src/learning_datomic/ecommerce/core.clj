@@ -11,7 +11,7 @@
 (defn print-session [session-name & values]
   (print-header session-name)
   (doseq [value values]
-    (pprint value))
+    (clojure.edn/read-string (pprint value)))
   (println))
 
 (defn setup-database []
@@ -66,9 +66,8 @@
       (db/all-prices (d/db conn)))
 
     (print-session
-      "Query example with explicit :in"
+      "Query example with implicit :in"
       (d/q '[:find ?e
-             :in $
              :where [?e :product/path "/computer"]]
            (d/db conn)))
 
@@ -77,6 +76,21 @@
       (d/q '[:find ?e
              :in $
              :where [?e :product/path "/computer"]]
+           (d/db conn)))
+
+    (print-session
+      "Query example with parameters"
+      (d/q '[:find ?e ?path
+             :in $ ?path
+             :where [?e :product/path ?path]]
+           (d/db conn)
+           "/computer"))
+
+    (print-session
+      "Query example with keys"
+      (d/q '[:find ?e ?path
+             :keys product/id product/path
+             :where [?e :product/path ?path]]
            (d/db conn)))
 
     (print-session
@@ -88,9 +102,27 @@
       (db/product-names-and-prices (d/db conn)))
 
     (print-session
+      "All products with all attrs"
+      (db/all-products-with-all-attrs (d/db conn)))
+
+    (print-session
+      "All products"
+      (db/all-products (d/db conn)))
+
+    (print-session
+      "All products with all attrs"
+      (db/all-products-* (d/db conn)))
+
+    (print-session
       "Select everything (does not work)"
-      (d/q '[:find ?e ?a ?v ?t
+      #_(d/q '[:find ?e ?a ?v ?t
              :where [?e ?a ?v ?t]]
+           (d/db conn)))
+
+    (print-session
+      "Select schemas"
+      (d/q '[:find ?e ?v
+             :where [?e :db/ident ?v]]
            (d/db conn)))))
 
 #_(setup-database)

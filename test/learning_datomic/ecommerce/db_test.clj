@@ -31,5 +31,10 @@
                      :db/cardinality :db.cardinality/one
                      :db/doc         "A name that is a string"}
         {:keys [tx-data]} @(d/transact (conn) [name-schema])]
-    (testing "first datom is a transaction")
-    (is (= [] (:e (first tx-data))))))
+    (testing "first datom is a transaction"
+      (let [first-datum (first tx-data)
+            {:keys [e a v]} first-datum]
+        (is (number? e))
+        (is (number? a))
+        (is (inst? v))))
+    ))
