@@ -71,72 +71,76 @@
   (d/transact conn schema))
 
 (defn all-product-entity-ids [db]
-  (d/q '[:find ?e
-         :where [?e :product/name]]
+  (d/q '{:find  [?e]
+         :where [[?e :product/name]]}
        db))
 
 (defn all-products-with-path [db path]
-  (d/q '[:find ?e
-         :in $ ?path
-         :where [?e :product/path ?path]]
+  (d/q '{:find  [?e]
+         :in    [$ ?path]
+         :where [[?e :product/path ?path]]}
        db
        path))
 
 (defn all-paths [db]
-  (d/q '[:find ?path
-         :where [_ :product/path ?path]]
+  (d/q '{:find  [?path]
+         :where [[_ :product/path ?path]]}
        db))
 
 (defn all-prices [db]
-  (d/q '[:find ?price
-         :where [_ :product/price ?price]]
+  (d/q '{:find  [?price]
+         :where [[_ :product/price ?price]]}
        db))
 
 (defn product-names-and-prices-cartesian [db]
-  (d/q '[:find ?name ?price
-         :where [_ :product/name ?name]
-         [_ :product/price ?price]]
+  (d/q '{:find  [?name ?price]
+         :where [[_ :product/name ?name]
+                 [_ :product/price ?price]]}
        db))
 
 (defn product-names-and-prices [db]
-  (d/q '[:find ?name ?price
-         :keys product/name product/price
-         :where [?e :product/name ?name]
-         [?e :product/price ?price]]
+  (d/q '{:find  [?name ?price]
+         :keys  [product/name product/price]
+         :where [[?e :product/name ?name]
+                 [?e :product/price ?price]]}
        db))
 
 (defn all-products-with-all-attrs
   "Only work when entity have all attributes set"
   [db]
-  (d/q '[:find ?e ?name ?path ?price
-         :keys product/id product/name product/path product/price
-         :where [?e :product/name ?name]
-         [?e :product/path ?path]
-         [?e :product/price ?price]] db))
+  (d/q '{:find  [?e ?name ?path ?price]
+         :keys  [product/id product/name product/path product/price]
+         :where [[?e :product/name ?name]
+                 [?e :product/path ?path]
+                 [?e :product/price ?price]]}
+       db))
 
 (defn all-products
   "Works with sparse entities"
   [db]
-  (d/q '[:find (pull ?e [:product/name :product/path :product/price])
-         :where [?e :product/name ?name]] db))
+  (d/q '{:find  [(pull ?e [:product/name :product/path :product/price])]
+         :where [[?e :product/name ?name]]}
+       db))
 
 (defn all-products-*
   "Works with sparse entities"
   [db]
-  (d/q '[:find (pull ?e [*])
-         :where [?e :product/name ?name]] db))
+  (d/q '{:find  [(pull ?e [*])]
+         :where [[?e :product/name ?name]]}
+       db))
 
 (defn all-categories
   [db]
-  (d/q '[:find (pull ?e [*])
-         :where [?e :category/id]]
+  (d/q '{:find  [(pull ?e [*])]
+         :where [[?e :category/id]]}
        db))
 
 (defn all-products-with-prices-greater-than [db minimum-price]
-  (d/q '[:find (pull ?e [*])
-         :in $ ?minimum-price
-         :where [?e :product/price ?price]
-         [(> ?price ?minimum-price)]] db minimum-price))
+  (d/q '{:find  [(pull ?e [*])]
+         :in    [$ ?minimum-price]
+         :where [[?e :product/price ?price]
+                 [(> ?price ?minimum-price)]]}
+       db minimum-price))
 
 (defn find-product-by-eid [db id]
   (d/pull db '[*] id))
@@ -146,20 +150,21 @@
   (d/pull db '[*] [:product/id product-id]))
 
 (defn find-product-by-name [db name]
-  (d/q '[:find (pull ?e [*])
-         :in $ ?name
-         :where [?e :product/name ?name]] db name))
+  (d/q '{:find  [(pull ?e [*])]
+         :in    [$ ?name]
+         :where [[?e :product/name ?name]]}
+       db name))
 
 (defn first-product-with-path [db path]
-  (ffirst (d/q '[:find (pull ?e [*])
-                 :in $ ?path
-                 :where [?e :product/path ?path]]
+  (ffirst (d/q '{:find  [(pull ?e [*])]
+                 :in    [$ ?path]
+                 :where [[?e :product/path ?path]]}
                db path)))
 
 (defn uuid->eid [db id-attr uuid]
-  (ffirst (d/q '[:find ?e
-                 :in $ ?id-attr ?uuid
-                 :where [?e ?id-attr ?uuid]]
+  (ffirst (d/q '{:find  [?e]
+                 :in    [$ ?id-attr ?uuid]
+                 :where [[?e ?id-attr ?uuid]]}
                db id-attr uuid)))
 
 (defn lookup-ref [attribute entity]
