@@ -1,10 +1,12 @@
 # learning-datomic
 
-A Clojure library designed to ... well, that part is up to you.
+This repository contains my datomic studies
 
 ## Usage
 
-FIXME
+There's some example code at the ecommerce namespace and some tests to verify datomic behaviors.
+
+To run the tests, execute `lein test`.
 
 ## License
 
